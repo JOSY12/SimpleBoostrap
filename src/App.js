@@ -17,6 +17,36 @@ function App() {
     Lastname: "",
     Salary: 1000,
   });
+  const [errores, seterrores] = useState({ Name: "", Lastname: "" });
+
+  function validate(input) {
+    let Errors = {};
+    if (!input.Name) {
+      Errors.Name = "Name is required";
+    } else if (input.Name.length <= 2) {
+      Errors.Name = "Name is too short";
+    }
+    if (
+      /\d|\\w|[~!@#$%{^&*()_:.=';[}|"`?>><]/gm.test(input.Name) ||
+      !/[a-z]/gm.test(input.Name)
+    ) {
+      Errors.Name = "Name is invalid";
+    }
+
+    if (!input.Lastname) {
+      Errors.Lastname = "Lastname is required";
+    } else if (input.Lastname.length <= 3) {
+      Errors.Lastname = "Lastname is too short";
+    }
+
+    if (
+      /\d|\\w|[~!@#$%{^&*()_:.=';[}|"`?>><]/gm.test(input.Lastname) ||
+      !/[a-z]/gm.test(input.Lastname)
+    ) {
+      Errors.Lastname = "Lastname is invalid";
+    }
+    return Errors;
+  }
 
   function addemployee(e) {
     e.preventDefault();
@@ -30,6 +60,8 @@ function App() {
     const value = e.target.value;
 
     setemploye({ ...employe, [property]: value });
+
+    seterrores(validate({ ...employe, [property]: value }));
   }
 
   function deleteworker(id) {
@@ -37,15 +69,15 @@ function App() {
 
     setemployees(filtered);
   }
-  console.log(employees);
-  useEffect(() => {}, [employees, employe]);
+
+  useEffect(() => {}, [employees]);
 
   return (
-    <div className="App-header ">
-      <div className=" ">
-        <div className="container border border-primary p-5 border-5  bg-dark  rounded ">
-          <form onSubmit={addemployee} className="row ">
-            <label className="form-label p-0 m-0 mt-2">Name</label>
+    <div className="App-header container-fluid pt-5   ">
+      <div className=" container separador  ">
+        <div className="container  border border-primary p-5 border-5  bg-dark  rounded ">
+          <form onSubmit={addemployee} className="row  ">
+            <label className="  form-label   m-0 mt-2">Name*</label>
             <input
               onChange={setchanges}
               name="Name"
@@ -53,15 +85,21 @@ function App() {
               type="text"
               className="form-control"
             ></input>
-            <label className="col form-label p-0 m-0 mt-2">Last name</label>
+            {errores.Name && (
+              <p className="text-danger fs-5  ">{errores.Name}</p>
+            )}
+            <label className="  form-label pt-5 m-0 mt-2">Last name*</label>
             <input
               onChange={setchanges}
               name="Lastname"
               value={employe.Lastname}
               type="text"
-              className="form-control"
+              className="form-control  "
             ></input>
-            <label className="col form-label p-0 m-0 mt-2">salary</label>
+            {errores.Lastname && (
+              <p className="text-danger  fs-5">{errores.Lastname}</p>
+            )}
+            <label className="col form-label pt-5 m-0 mt-2">salary</label>
             <input
               onChange={setchanges}
               name="Salary"
@@ -70,14 +108,18 @@ function App() {
               className="form-control"
             ></input>
             <hr></hr>
-            <button type="submit" className="btn btn-primary fw-bold">
+            <button
+              type="submit"
+              disabled={errores.Name || errores.Lastname}
+              className="btn btn-primary fw-bold"
+            >
               Add Employe
             </button>
           </form>
         </div>
 
-        <div className=" container border rounded border-3 mt-5 bg-dark">
-          <div className=" row container ">
+        <div className=" container   border rounded border-3 mt-5 bg-dark">
+          <div className=" row   ">
             <label className="text-start ">Employees</label>
             <label className="col text-start ">Name:</label>
             <label className="col text-start ">Last name:</label>
@@ -86,10 +128,13 @@ function App() {
             <hr></hr>
           </div>
 
-          <div className=" row container ">
-            {employees.map((e, i) => {
+          <div className="row   ">
+            {employees.sort().map((e, i) => {
               return (
-                <ul className="row text  container m-0 p-0 ">
+                <ul
+                  key={i + e.Name + e.Lastname}
+                  className="row text    m-0 p-0 "
+                >
                   <li key={e.Name + i} className=" col   text-start text-break">
                     {e.Name}
                   </li>
